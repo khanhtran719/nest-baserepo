@@ -9,13 +9,17 @@
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
     "lint": "eslint \"{src,test}/**/*.ts\"",
-    "format": "prettier --write \"{src,test}/**/*.{ts,md,json}\" README.md AGENTS.md .ai/*.md",
-    "format:check": "prettier --check \"{src,test}/**/*.{ts,md,json}\" README.md AGENTS.md .ai/*.md",
+    "format": "prettier --write \"{src,test}/**/*.{ts,md,json}\" README.md",
+    "format:check": "prettier --check \"{src,test}/**/*.{ts,md,json}\" README.md",
     "typecheck": "tsc --noEmit",
     "test": "jest --config jest.config.ts --runInBand",
     "test:watch": "jest --config jest.config.ts --watch",
     "test:cov": "jest --config jest.config.ts --coverage --runInBand",
-    "test:e2e": "jest --config test/jest-e2e.json --runInBand"
+    "test:e2e": "jest --config test/jest-e2e.json --runInBand",
+    "test:integration": "jest --config test/jest-integration.json --runInBand",
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/infrastructure/database/data-source.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/data-source.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/infrastructure/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
@@ -25,6 +29,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "^16.4.7",
     "nestjs-pino": "^4.4.0",
     "pg": "^8.13.1",
     "pino": "^9.6.0",
@@ -51,5 +56,8 @@
     "ts-node": "^10.9.2",
     "ts-jest": "^29.2.6",
     "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "multer": "^2.4.0"
   }
 }

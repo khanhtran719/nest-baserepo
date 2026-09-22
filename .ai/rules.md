@@ -16,7 +16,10 @@ When instructions conflict, use this precedence:
 3. .ai/rules.md
 4. .ai/architecture.md
 5. .ai/overview.md
-6. Existing code conventions
+6. .ai/conventions.md
+7. .ai/workflow.md
+8. .ai/module-template.md when applicable
+9. Existing code conventions
 ```
 
 If a task requires violating an architecture rule:

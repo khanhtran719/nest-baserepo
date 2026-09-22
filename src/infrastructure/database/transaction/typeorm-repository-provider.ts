@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, EntityManager, ObjectLiteral, Repository } from 'typeorm';
-import { RepositoryProvider } from '../../../shared/application/ports/repository-provider.port';
+import { DataSource, EntityManager, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 import { TypeOrmTransactionContext } from './typeorm-transaction-context';
 
 @Injectable()
-export class TypeOrmRepositoryProvider implements RepositoryProvider {
+export class TypeOrmRepositoryProvider {
   constructor(
     private readonly dataSource: DataSource,
     private readonly transactionContext: TypeOrmTransactionContext,
   ) {}
 
-  get<T>(entity: new () => T): Repository<T & ObjectLiteral> {
+  getRepository<T extends ObjectLiteral>(entity: EntityTarget<T>): Repository<T> {
     const manager: EntityManager | undefined = this.transactionContext.getManager();
-    const ormEntity = entity as new () => T & ObjectLiteral;
-    return manager ? manager.getRepository(ormEntity) : this.dataSource.getRepository(ormEntity);
+    return manager ? manager.getRepository(entity) : this.dataSource.getRepository(entity);
   }
 }

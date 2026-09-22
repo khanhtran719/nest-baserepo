@@ -68,13 +68,17 @@ Before architecture-sensitive implementation, read in this exact order:
 
 4. .ai/rules.md
 
-5. .ai/workflow.md
+5. .ai/conventions.md
 
-6. Relevant module-specific documentation
+6. .ai/workflow.md
 
-7. Relevant source code
+7. .ai/module-template.md when creating or restructuring a module
 
-8. Relevant tests
+8. Relevant module-specific documentation
+
+9. Relevant source code
+
+10. Relevant tests
 ```
 
 Do not rely on remembered architecture when the repository documentation is available.
@@ -98,9 +102,13 @@ When instructions conflict, use this order:
 
 5. .ai/overview.md
 
-6. .ai/workflow.md
+6. .ai/conventions.md
 
-7. Existing local code conventions
+7. .ai/workflow.md
+
+8. .ai/module-template.md when applicable
+
+9. Existing local code conventions
 ```
 
 If an explicit task requires breaking an architecture rule:

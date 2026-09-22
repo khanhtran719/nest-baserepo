@@ -1,13 +1,11 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { REPOSITORY_PROVIDER } from '../../shared/application/ports/repository-provider.port';
 import { UNIT_OF_WORK } from '../../shared/application/unit-of-work/unit-of-work.constants';
 import { TypeOrmRepositoryProvider } from './transaction/typeorm-repository-provider';
 import { TypeOrmTransactionContext } from './transaction/typeorm-transaction-context';
 import { TypeOrmUnitOfWork } from './transaction/typeorm-unit-of-work';
 
-@Global()
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -29,8 +27,7 @@ import { TypeOrmUnitOfWork } from './transaction/typeorm-unit-of-work';
     TypeOrmUnitOfWork,
     TypeOrmRepositoryProvider,
     { provide: UNIT_OF_WORK, useExisting: TypeOrmUnitOfWork },
-    { provide: REPOSITORY_PROVIDER, useExisting: TypeOrmRepositoryProvider },
   ],
-  exports: [UNIT_OF_WORK, REPOSITORY_PROVIDER, TypeOrmTransactionContext],
+  exports: [UNIT_OF_WORK, TypeOrmRepositoryProvider],
 })
 export class DatabaseModule {}

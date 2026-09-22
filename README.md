@@ -13,15 +13,18 @@ The current runtime intentionally contains no business module. It exposes only t
 ```bash
 cp .env.example .env
 npm install
-docker compose up -d postgres redis
 npm run start:dev
 ```
+
+The health-only runtime has no required infrastructure dependency. Start PostgreSQL or Redis with `docker compose up -d postgres redis` only when working on an adapter that needs them.
 
 The API listens on `PORT` (default `3000`). Liveness is `GET /live` and readiness is `GET /ready`. Both endpoints are independent of optional PostgreSQL, Redis, and Kafka services.
 
 ## Commands
 
-`npm run format`, `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`, and `npm run test:e2e` are the standard validation commands.
+`npm run format`, `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`, `npm run test:integration`, and `npm run test:e2e` are the standard validation commands.
+
+TypeORM migrations use `npm run migration:generate -- <migration-path>`, `npm run migration:run`, and `npm run migration:revert`. Database commands require the `DB_*` variables from `.env.example`.
 
 ## Adding a module
 

@@ -5,10 +5,10 @@ const config: Config = {
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
+  setupFiles: ['reflect-metadata'],
   collectCoverageFrom: ['src/**/*.ts', '!src/main.ts'],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
 };
 
 export default config;
-

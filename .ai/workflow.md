@@ -78,7 +78,13 @@ AGENTS.md
 .ai/rules.md
     |
     v
+.ai/conventions.md
+    |
+    v
 .ai/workflow.md
+    |
+    v
+.ai/module-template.md when creating or restructuring a module
     |
     v
 Relevant module documentation

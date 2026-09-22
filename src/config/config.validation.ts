@@ -1,5 +1,14 @@
-import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
+import { plainToInstance, Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  validateSync,
+} from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -14,24 +23,47 @@ class EnvironmentVariables {
   @IsInt()
   @Min(1)
   @Max(65535)
+  @Type(() => Number)
   PORT = 3000;
 
   @IsString()
-  DB_HOST = 'localhost';
+  @IsOptional()
+  DB_HOST?: string;
 
   @IsInt()
   @Min(1)
   @Max(65535)
-  DB_PORT = 5432;
+  @IsOptional()
+  @Type(() => Number)
+  DB_PORT?: number;
 
   @IsString()
-  DB_USERNAME = 'postgres';
+  @IsOptional()
+  DB_USERNAME?: string;
 
   @IsString()
-  DB_PASSWORD = 'postgres';
+  @IsOptional()
+  DB_PASSWORD?: string;
 
   @IsString()
-  DB_DATABASE = 'nest_base';
+  @IsOptional()
+  DB_DATABASE?: string;
+
+  @IsString()
+  @IsOptional()
+  REDIS_HOST?: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  @IsOptional()
+  @Type(() => Number)
+  REDIS_PORT?: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  KAFKA_BROKERS?: string;
 
   @IsOptional()
   @IsString()
@@ -46,7 +78,11 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   if (errors.length > 0) {
     throw new Error(
       errors
-        .map((error) => Object.values(error.constraints ?? {}))
+        .map((error) =>
+          Object.values(error.constraints ?? {}).map(
+            (constraint) => `${error.property}: ${constraint}`,
+          ),
+        )
         .flat()
         .join('; '),
     );

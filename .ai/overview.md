@@ -1015,7 +1015,13 @@ AGENTS.md
 .ai/rules.md
     |
     v
+.ai/conventions.md
+    |
+    v
 .ai/workflow.md
+    |
+    v
+.ai/module-template.md when creating or restructuring a module
 ```
 
 Use:
@@ -1030,8 +1036,14 @@ architecture.md
 rules.md
     = compact MUST / MUST NOT enforcement
 
+conventions.md
+    = normative code shape and naming contract
+
 workflow.md
     = how agents should execute tasks
+
+module-template.md
+    = approved module blueprints; use only when applicable
 ```
 
 ---
