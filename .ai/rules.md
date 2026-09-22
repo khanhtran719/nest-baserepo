@@ -1091,7 +1091,7 @@ promotion.update
 Scatter hard-coded checks such as:
 
 ```ts
-user.role === 'ADMIN';
+user.role === 'ADMIN'
 ```
 
 throughout business code.
@@ -1294,7 +1294,7 @@ Use typed configuration.
 Scatter:
 
 ```ts
-process.env.X;
+process.env.X
 ```
 
 through business/application code.
@@ -1333,8 +1333,6 @@ Keep liveness and readiness conceptually separate.
 Dependency criticality must be explicit.
 
 Optional dependency failure should not automatically make the process unready.
-
-For the current bootstrap, the health capability is the only runtime business-facing capability. Do not add a sample or placeholder business module merely to demonstrate folders; add a real capability only when its ownership, lifecycle, and public contract are defined.
 
 ---
 

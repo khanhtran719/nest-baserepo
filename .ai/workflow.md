@@ -393,7 +393,7 @@ Does the current invariant require serialization?
 If yes, express intent through repository methods such as:
 
 ```ts
-findForUpdate(id);
+findForUpdate(id)
 ```
 
 The lock implementation belongs to infrastructure.

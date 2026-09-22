@@ -4,6 +4,7 @@
 > This file is the core source of truth for how APIs, workers, and integrations must operate in this repository.  
 > When implementation and this document conflict, the agent/developer must stop, identify the cause, and deliberately update one or the other — never silently break the architectural boundary.
 
+
 ## 1. Purpose
 
 This document defines the architectural rules for this NestJS backend.
@@ -29,10 +30,6 @@ The system follows a **Production-grade Modular Monolith Architecture** combinin
 - Horizontal scaling / HA-ready deployment
 
 The goal is not to maximize abstraction.
-
-## Current bootstrap boundary
-
-The initial runtime intentionally contains no business capability. `AppModule` imports configuration, structured logging, and `HealthModule` only. `/live` answers process liveness and `/ready` answers serving readiness; neither endpoint requires PostgreSQL, Redis, or Kafka. Database transactions, repository providers, outbox ports, and integration configuration remain infrastructure extension points for future modules.
 
 The goal is to create clear boundaries so that:
 
@@ -522,13 +519,16 @@ Infrastructure describes **how it happens technically**.
 
 ```ts
 return this.unitOfWork.transaction(async () => {
-  const invoice = await this.invoiceRepository.findForUpdate(invoiceId);
+  const invoice =
+    await this.invoiceRepository.findForUpdate(invoiceId);
 
   invoice.pay(payment);
 
   await this.invoiceRepository.save(invoice);
 
-  await this.outbox.add(InvoicePaidEvent.from(invoice));
+  await this.outbox.add(
+    InvoicePaidEvent.from(invoice),
+  );
 
   return invoice;
 });
@@ -545,6 +545,7 @@ Repository<T>
 ```
 
 ---
+
 
 # 13A. API Execution Contract
 
@@ -829,7 +830,9 @@ Example abstraction:
 
 ```ts
 export interface PromotionPricingPort {
-  calculate(input: PromotionPricingInput): Promise<PromotionPricingResult>;
+  calculate(
+    input: PromotionPricingInput,
+  ): Promise<PromotionPricingResult>;
 }
 ```
 
@@ -973,7 +976,9 @@ Example:
 
 ```ts
 export interface PaymentGateway {
-  charge(request: ChargeRequest): Promise<ChargeResult>;
+  charge(
+    request: ChargeRequest,
+  ): Promise<ChargeResult>;
 }
 ```
 
@@ -1337,6 +1342,7 @@ An API/use case is only complete when the agent confirms:
 
 ---
 
+
 # 14. Unit of Work
 
 The application-facing abstraction is:
@@ -1345,7 +1351,9 @@ The application-facing abstraction is:
 export const UNIT_OF_WORK = Symbol('UNIT_OF_WORK');
 
 export interface UnitOfWork {
-  transaction<T>(work: () => Promise<T>): Promise<T>;
+  transaction<T>(
+    work: () => Promise<T>,
+  ): Promise<T>;
 }
 ```
 
@@ -1354,8 +1362,9 @@ Do not expose `EntityManager`.
 Incorrect:
 
 ```ts
-unitOfWork.transaction(async (manager) => {
-  const repository = manager.getRepository(InvoiceOrmEntity);
+unitOfWork.transaction(async manager => {
+  const repository =
+    manager.getRepository(InvoiceOrmEntity);
 });
 ```
 
@@ -1380,9 +1389,13 @@ Example:
 ```ts
 @Injectable()
 export class TypeOrmTransactionContext {
-  private readonly storage = new AsyncLocalStorage<EntityManager>();
+  private readonly storage =
+    new AsyncLocalStorage<EntityManager>();
 
-  run<T>(manager: EntityManager, work: () => Promise<T>): Promise<T> {
+  run<T>(
+    manager: EntityManager,
+    work: () => Promise<T>,
+  ): Promise<T> {
     return this.storage.run(manager, work);
   }
 
@@ -1404,18 +1417,26 @@ This class belongs to infrastructure only.
 
 ```ts
 @Injectable()
-export class TypeOrmUnitOfWork implements UnitOfWork {
+export class TypeOrmUnitOfWork
+  implements UnitOfWork {
+
   constructor(
     private readonly dataSource: DataSource,
-    private readonly context: TypeOrmTransactionContext,
+    private readonly context:
+      TypeOrmTransactionContext,
   ) {}
 
-  async transaction<T>(work: () => Promise<T>): Promise<T> {
+  async transaction<T>(
+    work: () => Promise<T>,
+  ): Promise<T> {
     if (this.context.isInTransaction()) {
       return work();
     }
 
-    return this.dataSource.transaction((manager) => this.context.run(manager, work));
+    return this.dataSource.transaction(
+      manager =>
+        this.context.run(manager, work),
+    );
   }
 }
 ```
@@ -1438,11 +1459,15 @@ Do not create independent nested transactions unless explicitly required.
 export class TypeOrmRepositoryProvider {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly transactionContext: TypeOrmTransactionContext,
+    private readonly transactionContext:
+      TypeOrmTransactionContext,
   ) {}
 
-  getRepository<T extends ObjectLiteral>(entity: EntityTarget<T>): Repository<T> {
-    const manager = this.transactionContext.getManager();
+  getRepository<T extends ObjectLiteral>(
+    entity: EntityTarget<T>,
+  ): Repository<T> {
+    const manager =
+      this.transactionContext.getManager();
 
     if (manager) {
       return manager.getRepository(entity);
@@ -1499,14 +1524,19 @@ Repositories exposed to application/domain code are interfaces.
 Example:
 
 ```ts
-export const INVOICE_REPOSITORY = Symbol('INVOICE_REPOSITORY');
+export const INVOICE_REPOSITORY =
+  Symbol('INVOICE_REPOSITORY');
 
 export interface InvoiceRepository {
   findById(id: string): Promise<Invoice | null>;
 
-  findForUpdate(id: string): Promise<Invoice>;
+  findForUpdate(
+    id: string,
+  ): Promise<Invoice>;
 
-  save(invoice: Invoice): Promise<void>;
+  save(
+    invoice: Invoice,
+  ): Promise<void>;
 }
 ```
 
@@ -1561,11 +1591,15 @@ Example:
 
 ```ts
 export class InvoiceMapper {
-  static toPersistence(invoice: Invoice): InvoiceOrmEntity {
+  static toPersistence(
+    invoice: Invoice,
+  ): InvoiceOrmEntity {
     // ...
   }
 
-  static toDomain(entity: InvoiceOrmEntity): Invoice {
+  static toDomain(
+    entity: InvoiceOrmEntity,
+  ): Invoice {
     // ...
   }
 }
@@ -1656,7 +1690,9 @@ Example:
     ]),
   ],
 
-  controllers: [InvoiceController],
+  controllers: [
+    InvoiceController,
+  ],
 
   providers: [
     CreateInvoiceService,
@@ -1690,12 +1726,17 @@ export default new DataSource({
   // ...
 
   entities: [
-    __dirname + '/../../modules/**/*.orm-entity{.ts,.js}',
+    __dirname +
+      '/../../modules/**/*.orm-entity{.ts,.js}',
 
-    __dirname + '/../outbox/**/*.orm-entity{.ts,.js}',
+    __dirname +
+      '/../outbox/**/*.orm-entity{.ts,.js}',
   ],
 
-  migrations: [__dirname + '/migrations/*{.ts,.js}'],
+  migrations: [
+    __dirname +
+      '/migrations/*{.ts,.js}',
+  ],
 
   synchronize: false,
 });
@@ -1742,13 +1783,19 @@ Nest module exports define the module public surface.
 Avoid:
 
 ```ts
-exports: [InvoiceOrmEntity, TypeOrmInvoiceRepository, INVOICE_REPOSITORY];
+exports: [
+  InvoiceOrmEntity,
+  TypeOrmInvoiceRepository,
+  INVOICE_REPOSITORY,
+]
 ```
 
 Prefer:
 
 ```ts
-exports: [InvoiceFacade];
+exports: [
+  InvoiceFacade,
+]
 ```
 
 or export nothing if not needed.
@@ -1890,7 +1937,9 @@ Preferred:
 return this.unitOfWork.transaction(async () => {
   await this.invoiceRepository.save(invoice);
 
-  await this.outbox.add(InvoicePaidEvent.from(invoice));
+  await this.outbox.add(
+    InvoicePaidEvent.from(invoice),
+  );
 });
 ```
 
@@ -2130,7 +2179,9 @@ Example:
 
 ```ts
 export interface PaymentGateway {
-  charge(request: ChargeRequest): Promise<ChargeResult>;
+  charge(
+    request: ChargeRequest,
+  ): Promise<ChargeResult>;
 }
 ```
 
@@ -2250,9 +2301,9 @@ throw new InvoiceAlreadyPaidError();
 Domain code should not throw:
 
 ```ts
-BadRequestException;
-ConflictException;
-HttpException;
+BadRequestException
+ConflictException
+HttpException
 ```
 
 HTTP mapping happens at the presentation boundary.
@@ -2696,6 +2747,7 @@ Strengthen observability, resilience, security, and worker boundaries.
 
 ---
 
+
 # 63A. Execution Flow Priority Rule
 
 When implementing APIs, the flows defined in sections `13A` through `13N` are normative.
@@ -2714,6 +2766,7 @@ constructor(
 Using this in a Controller/Service does not mean the architecture allows this pattern in every layer.
 
 Framework capability is not an Architecture Decision.
+
 
 # 64. Architecture Rules for Agents
 
@@ -2986,13 +3039,18 @@ Application code should remain readable:
 
 ```ts
 return this.unitOfWork.transaction(async () => {
-  const invoice = await this.invoiceRepository.findForUpdate(command.invoiceId);
+  const invoice =
+    await this.invoiceRepository.findForUpdate(
+      command.invoiceId,
+    );
 
   invoice.pay(command.payment);
 
   await this.invoiceRepository.save(invoice);
 
-  await this.outbox.add(InvoicePaidEvent.from(invoice));
+  await this.outbox.add(
+    InvoicePaidEvent.from(invoice),
+  );
 
   return InvoiceResult.from(invoice);
 });

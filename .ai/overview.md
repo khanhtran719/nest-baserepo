@@ -47,19 +47,6 @@ Future evolvability
 
 The goal is not to maximize patterns, abstractions, or folder count.
 
-## Current bootstrap scope
-
-The current application runtime is deliberately limited to the health capability:
-
-```text
-AppModule
-├── configuration
-├── structured logging
-└── health (/live, /ready)
-```
-
-No business module is installed yet. Database transaction infrastructure, outbox ports, and integration configuration are reusable foundations only; they are not imported into the health-only runtime until a capability-owned module needs them.
-
 ---
 
 ## 2. Core Mental Model
