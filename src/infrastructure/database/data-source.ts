@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import databaseConfig from '../../config/database.config';
-import { ExampleOrmEntity } from '../../modules/example/infrastructure/persistence/typeorm/entities/example.orm-entity';
 
 const config = databaseConfig();
 
@@ -12,6 +11,6 @@ export default new DataSource({
   username: config.username,
   password: config.password,
   database: config.database,
-  entities: [ExampleOrmEntity],
+  entities: ['dist/modules/**/infrastructure/persistence/typeorm/entities/*.{js,ts}'],
   migrations: ['dist/infrastructure/database/migrations/*.{js,ts}'],
 });

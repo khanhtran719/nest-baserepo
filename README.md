@@ -6,7 +6,7 @@ Production-grade NestJS modular monolith foundation. The repository establishes 
 
 The code uses DDD-lite, Clean/Hexagonal boundaries, repository ports, CQRS-lite conventions, and a transaction-aware Unit of Work. Read the [agent contract](AGENTS.md), [overview](.ai/overview.md), and [architecture contract](.ai/architecture.md) before changing code.
 
-The Example module is a small reference implementation. TypeORM is kept in module infrastructure, while application code depends on ports and `UNIT_OF_WORK`. Redis and Kafka configuration is documented but optional until an adapter and failure policy are introduced.
+The current runtime intentionally contains no business module. It exposes only the health capability; TypeORM transaction infrastructure, outbox ports, and Redis/Kafka configuration remain extension points for future capability-owned modules.
 
 ## Local setup
 
@@ -17,7 +17,7 @@ docker compose up -d postgres redis
 npm run start:dev
 ```
 
-The API listens on `PORT` (default `3000`). Liveness is `GET /live`, readiness is `GET /ready`, and the example write endpoint is `POST /examples` with `{ "name": "sample" }`.
+The API listens on `PORT` (default `3000`). Liveness is `GET /live` and readiness is `GET /ready`. Both endpoints are independent of optional PostgreSQL, Redis, and Kafka services.
 
 ## Commands
 
