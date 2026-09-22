@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  MinLength,
   IsOptional,
   IsString,
   Max,
@@ -25,6 +26,26 @@ class EnvironmentVariables {
   @Max(65535)
   @Type(() => Number)
   PORT = 3000;
+
+  @IsString()
+  @MinLength(32)
+  @IsOptional()
+  ACCESS_KEY?: string;
+
+  @IsString()
+  @MinLength(32)
+  @IsOptional()
+  REFRESH_KEY?: string;
+
+  @IsInt()
+  @Min(60)
+  @Type(() => Number)
+  ACCESS_TTL_SECONDS = 900;
+
+  @IsInt()
+  @Min(300)
+  @Type(() => Number)
+  REFRESH_TTL_SECONDS = 604800;
 
   @IsString()
   @IsOptional()
@@ -75,6 +96,20 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
     enableImplicitConversion: true,
   });
   const errors = validateSync(validated, { skipMissingProperties: false });
+  const required = [
+    'ACCESS_KEY',
+    'REFRESH_KEY',
+    'DB_HOST',
+    'DB_PORT',
+    'DB_USERNAME',
+    'DB_PASSWORD',
+    'DB_DATABASE',
+  ];
+  for (const property of required) {
+    if (config[property] === undefined || config[property] === '') {
+      throw new Error(`${property}: required`);
+    }
+  }
   if (errors.length > 0) {
     throw new Error(
       errors

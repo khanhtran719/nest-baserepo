@@ -6,19 +6,25 @@ Production-grade NestJS modular monolith foundation. The repository establishes 
 
 The code uses DDD-lite, Clean/Hexagonal boundaries, repository ports, CQRS-lite conventions, and a transaction-aware Unit of Work. Read the [agent contract](AGENTS.md), [overview](.ai/overview.md), and [architecture contract](.ai/architecture.md) before changing code.
 
-The current runtime intentionally contains no business module. It exposes only the health capability; TypeORM transaction infrastructure, outbox ports, and Redis/Kafka configuration remain extension points for future capability-owned modules.
+The current runtime contains health endpoints and a database-backed authentication module. TypeORM transaction infrastructure, outbox ports, and Redis/Kafka configuration remain extension points for future capability-owned modules.
 
 ## Local setup
 
 ```bash
 cp .env.example .env
 npm install
+docker compose up -d postgres
+npm run migration:run
 npm run start:dev
 ```
 
-The health-only runtime has no required infrastructure dependency. Start PostgreSQL or Redis with `docker compose up -d postgres redis` only when working on an adapter that needs them.
+Authentication requires PostgreSQL and separate `ACCESS_KEY` / `REFRESH_KEY` values. Create a local account without committing credentials:
 
-The API listens on `PORT` (default `3000`). Liveness is `GET /live` and readiness is `GET /ready`. Both endpoints are independent of optional PostgreSQL, Redis, and Kafka services.
+```bash
+AUTH_SEED_EMAIL=admin@example.com AUTH_SEED_PASSWORD='replace-with-a-strong-password' npm run seed:auth
+```
+
+The API listens on `PORT` (default `3000`). It provides `POST /auth/login`, `POST /auth/refresh`, `GET /auth/profile`, and `POST /auth/logout`. Tokens are set as `HttpOnly`, `SameSite=Lax` cookies; `Secure` is enabled in production. Liveness is `GET /live` and readiness is `GET /ready`.
 
 ## Commands
 
@@ -32,4 +38,4 @@ Create a capability-owned module under `src/modules/<name>` with `domain`, `appl
 
 ## Environment
 
-Supported application and PostgreSQL settings are in `.env.example`. Redis and Kafka variables are reserved for future infrastructure adapters and do not make the current process fail when unavailable.
+Supported application, authentication, and PostgreSQL settings are in `.env.example`. Redis and Kafka variables are reserved for future infrastructure adapters and do not make the current process fail when unavailable.
